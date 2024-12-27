@@ -1,0 +1,10 @@
+# General patterns for all services
+
+#Compiled code
+*/dist/
+# Dependency directory
+*/node_modules/
+# Environment variables
+*/.env
+# Log file
+*/logs/

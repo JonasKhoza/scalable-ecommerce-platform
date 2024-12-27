@@ -1,2 +1,6 @@
 node_modules
 Dockerfile
+src
+*.log
+.env
+tsconfig.json

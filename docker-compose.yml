@@ -1,8 +1,17 @@
-version: '3.0'
+version: '3.8'
 services:
   user-service:
-  product-catalog-service:
-  shopping-cart-service:
-  order-service:
-  payment-service:
-  api-gateway-service:
+    build: 
+      context: ./user-service #Build from the users service
+      dockerfile: ./Dockerfile
+    volumes: 
+      - ./user-service:/app #Mount the user-service directory to /app in the container
+      - /app/node_modules # Prevents overwriting node_modules
+    ports:
+      - "8000:8000"
+
+  # product-catalog-service:
+  # shopping-cart-service:
+  # order-service:
+  # payment-service:
+  # api-gateway-service:
