@@ -1,0 +1,8 @@
+version: '3.0'
+services:
+  user-service:
+  product-catalog-service:
+  shopping-cart-service:
+  order-service:
+  payment-service:
+  api-gateway-service:
