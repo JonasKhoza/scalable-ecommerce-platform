@@ -1,38 +1,62 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { AuthUserI } from "../models/user.models";
-
-function createUserHandler(req: Request, res: Response) {
-  /*
-    This endpoint handles user registration, allowing new users to create an account.
-
-    ENSURE IT IS "IDEMPOTENT"
-
-    Workflow
-      1.Receive User Data: Accept username, email, password, and optional profile fields.
-      Validation:
-        Ensure all required fields are present.
-        Check if email and username are unique.
-        Validate the format of the email and password. This includes sending a verification email for the email and sms with OTP to the phone number 
-      6.Password Hashing: Use a secure hashing algorithm like bcrypt to hash the password before storing it.
-      7.Save to Database: Store the user data in the database.
-      8.Response: Return a success message or user data (excluding sensitive fields like the password).
-
-      {
-       firstName:
-       lastName:
-       username:
-       email:
-       password:
-       phoneNumber:
-      }
-
-      */
-  const { username, email, password } = req.body as AuthUserI;
-
-  console.log(req.body);
-
-  res.status(201).json("Success");
+import DBUser from "../models/dbuser.model";
+async function testing(req: Request, res: Response) {
+  res.json("Yebo!!!");
 }
+
+async function createUserHandler(req: Request, res: Response) {
+  try {
+    const { username, email, password } = req.body as AuthUserI;
+    const existingUser = await DBUser.findOne({ email });
+    if (existingUser) {
+      res.status(400).json({ message: "Email already in use " });
+      return;
+    }
+
+    console.log(req.body);
+
+    res.status(201).json("Success");
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+// Check for existing user
+// const existingUser = await DBUser.findOne({});
+// if (existingUser) {
+//   return res.status(400).json({ message: "Email already in use " });
+// }
+/*
+     This endpoint handles user registration, allowing new users to create an account.
+ 
+     ENSURE IT IS "IDEMPOTENT"
+ 
+     Workflow
+       1.Receive User Data: Accept username, email, password, and optional profile fields.
+       Validation:
+         Ensure all required fields are present.
+         Check if email and username are unique.
+         Validate the format of the email and password. This includes sending a verification email for the email and sms with OTP to the phone number 
+       6.Password Hashing: Use a secure hashing algorithm like bcrypt to hash the password before storing it.
+       7.Save to Database: Store the user data in the database.
+       8.Response: Return a success message or user data (excluding sensitive fields like the password).
+ 
+       {
+        firstName:
+        lastName:
+        username:
+        email:
+        password:
+        phoneNumber:
+       }
+ 
+       */
+// }
+
+// async function createUserHandler(req: Request, res: Response) {
+
+// }
 
 function loginUserHandler(req: Request, res: Response) {
   /*
@@ -111,4 +135,5 @@ export {
   loginUserHandler,
   getUserProfileHandler,
   updateUserProfileHandler,
+  testing,
 };

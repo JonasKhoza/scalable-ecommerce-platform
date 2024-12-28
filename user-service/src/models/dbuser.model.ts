@@ -1,20 +1,5 @@
 import mongoose from "mongoose";
 
-interface AuthUserI {
-  firstName: string;
-  lastName: string;
-  username: string;
-  password: string;
-  email: string;
-  phoneNumber: string;
-}
-
-interface DBUserI extends AuthUserI {
-  _id: string;
-  created_at: string;
-  updated_at: string;
-}
-
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -29,4 +14,4 @@ const userSchema = new mongoose.Schema({
 
 const DBUser = mongoose.model("User", userSchema);
 
-export { AuthUserI, DBUserI, DBUser };
+export default DBUser;
