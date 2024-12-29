@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 async function mongodbConnect() {
   console.log(process.env.MONGODB_USERNAME, process.env.MONGODB_PASSWORD);
-  const uri = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@cluster0.60bop.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+  //const uri = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@cluster0.60bop.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+  const uri = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@cluster0.60bop.mongodb.net/users?retryWrites=true&w=majority&appName=Cluster0`;
 
   try {
     await mongoose.connect(uri, {

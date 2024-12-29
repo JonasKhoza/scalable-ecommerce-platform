@@ -2,6 +2,7 @@ import express from "express";
 import * as dotenv from "dotenv";
 
 import authRouters from "./routes/auth.routes";
+import verifyRoutes from "./routes/verify.routes";
 import connectDB from "./data/database";
 
 //Populate the process object with our env variables
@@ -21,6 +22,7 @@ app.disable("x-powered-by");
 app.use(express.json());
 
 app.use("/v1/api/users", authRouters);
+app.use("/v1/api/users/verify", verifyRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
