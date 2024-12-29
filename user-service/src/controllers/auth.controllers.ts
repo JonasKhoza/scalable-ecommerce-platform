@@ -1,33 +1,15 @@
-import { NextFunction, Request, Response } from "express";
-import { AuthUserI } from "../models/user.models";
-import DBUser from "../models/dbuser.model";
-async function testing(req: Request, res: Response) {
-  res.json("Yebo!!!");
-}
+import { Request, Response } from "express";
+import { validationResult } from "express-validator";
+import * as bcrypt from "bcrypt";
+
+import { AuthUserI, DBUser } from "../models/user.models";
+import { CustomError } from "../models/error.models";
+import responseHelper from "../utils/errorResponseHelper";
+import validateUserInputHelper from "../utils/validateUserInputHelper";
+import { ResponseStructure } from "../models/response.models";
 
 async function createUserHandler(req: Request, res: Response) {
-  try {
-    const { username, email, password } = req.body as AuthUserI;
-    const existingUser = await DBUser.findOne({ email });
-    if (existingUser) {
-      res.status(400).json({ message: "Email already in use " });
-      return;
-    }
-
-    console.log(req.body);
-
-    res.status(201).json("Success");
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-// Check for existing user
-// const existingUser = await DBUser.findOne({});
-// if (existingUser) {
-//   return res.status(400).json({ message: "Email already in use " });
-// }
-/*
+  /*
      This endpoint handles user registration, allowing new users to create an account.
  
      ENSURE IT IS "IDEMPOTENT"
@@ -37,10 +19,10 @@ async function createUserHandler(req: Request, res: Response) {
        Validation:
          Ensure all required fields are present.
          Check if email and username are unique.
-         Validate the format of the email and password. This includes sending a verification email for the email and sms with OTP to the phone number 
-       6.Password Hashing: Use a secure hashing algorithm like bcrypt to hash the password before storing it.
-       7.Save to Database: Store the user data in the database.
-       8.Response: Return a success message or user data (excluding sensitive fields like the password).
+         Validate the format of the email and password. 
+       2.Password Hashing: Use a secure hashing algorithm like bcrypt to hash the password before storing it.
+       3.Save to Database: Store the user data in the database.
+       4.Response: Return a success message or user data (excluding sensitive fields like the password).
  
        {
         firstName:
@@ -52,11 +34,82 @@ async function createUserHandler(req: Request, res: Response) {
        }
  
        */
-// }
+  try {
+    //Step 1: VALIDATION
 
-// async function createUserHandler(req: Request, res: Response) {
+    //Get the input validation results from express validator middleware
+    const validationResults = validationResult(req);
+    //Get condition of results
+    const result = validateUserInputHelper(validationResults);
 
-// }
+    //Check condition of results
+    if (!result.success) {
+      //If error, then throw the error
+      throw result;
+    }
+
+    //Get user data from the request
+    const {
+      firstname,
+      lastname,
+      username,
+      email,
+      password,
+      phonenumber,
+      numcountrycode,
+    } = req.body as AuthUserI;
+
+    //Check if it's an existing user
+    const existingUser = await DBUser.findOne({ email });
+
+    if (existingUser) {
+      //User already exists
+      throw new CustomError(false, "User already exists!!", 409);
+    }
+
+    //If username, check if it is taken
+    const existingUsername = await DBUser.findOne({ username });
+    if (existingUsername) {
+      //User already exists
+      throw new CustomError(false, "Username is taken!", 409);
+    }
+
+    //STEP 2: HASH PASSWORD
+    if (
+      isNaN(Number(process.env.P_HASH_KEY!)) ||
+      Number(process.env.P_HASH_KEY!) <= 0
+    ) {
+      throw new Error(
+        "Invalid salt rounds. Please check the P_HASH_KEY environment variable."
+      );
+    }
+
+    const hashedPassword = String(
+      await bcrypt.hash(password, Number(process.env.P_HASH_KEY!))
+    );
+
+    const user = new DBUser({
+      username,
+      email,
+      password: hashedPassword,
+      firstname,
+      lastname,
+      phonenumber,
+      numcountrycode,
+      isAdmin: false,
+    });
+
+    await user.save();
+
+    res
+      .status(201)
+      .json(new ResponseStructure(true, "User is succesfully created."));
+  } catch (err) {
+    console.log(err);
+    responseHelper(res, err);
+    return;
+  }
+}
 
 function loginUserHandler(req: Request, res: Response) {
   /*
@@ -135,5 +188,4 @@ export {
   loginUserHandler,
   getUserProfileHandler,
   updateUserProfileHandler,
-  testing,
 };

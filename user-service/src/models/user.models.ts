@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 
 interface AuthUserI {
-  firstName: string;
-  lastName: string;
+  firstname?: string;
+  lastname?: string;
   username: string;
   password: string;
   email: string;
-  phoneNumber: string;
+  phonenumber?: number;
+  numcountrycode: string;
 }
 
 interface DBUserI extends AuthUserI {
@@ -15,17 +16,23 @@ interface DBUserI extends AuthUserI {
   updated_at: string;
 }
 
-const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
-  isAdmin: { type: Boolean, default: false },
+const userSchema = new mongoose.Schema(
+  {
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    firstname: { type: String, default: null },
+    lastname: { type: String, default: null },
+    phonenumber: { type: Number, default: null },
+    numcountrycode: { type: String, default: null },
+    isAdmin: { type: Boolean, default: false },
+    emailverified: { type: Boolean, default: false },
+    phoneverified: { type: Boolean, default: false },
 
-  //createdAt: { type: Date, default: Date.now },
-});
+    //createdAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
 
 const DBUser = mongoose.model("User", userSchema);
 

@@ -3,13 +3,14 @@ import { Response } from "express";
 import { CustomError } from "../models/error.models";
 import { ResponseStructure } from "../models/response.models";
 
-export default function responseHelper(res: Response, err: any) {
+export default function errorResponseHelper(res: Response, err: any) {
   console.log(err);
 
   if (err instanceof CustomError) {
     const error = {
       code: err.code,
       message: err.message,
+      details: err?.details,
     };
 
     return res
