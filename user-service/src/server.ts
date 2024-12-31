@@ -1,5 +1,6 @@
 import express from "express";
 import * as dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 import authRouters from "./routes/auth.routes";
 import verifyRoutes from "./routes/verify.routes";
@@ -20,6 +21,8 @@ app.disable("x-powered-by");
 
 //Parse the incoming data as with contenty-type being json
 app.use(express.json());
+//parse cookies middleware
+app.use(cookieParser());
 
 app.use("/v1/api/users", authRouters);
 app.use("/v1/api/users/verify", verifyRoutes);

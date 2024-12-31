@@ -15,7 +15,7 @@ export default function errorResponseHelper(res: Response, err: any) {
 
     return res
       .status(err.code)
-      .json(new ResponseStructure(false, null, null, error));
+      .json(new ResponseStructure(false, err.code, null, null, error));
   } else {
     const error = {
       code: 500,
@@ -25,6 +25,6 @@ export default function errorResponseHelper(res: Response, err: any) {
 
     return res
       .status(500)
-      .json(new ResponseStructure(false, null, null, error));
+      .json(new ResponseStructure(false, err.code, null, null, error));
   }
 }

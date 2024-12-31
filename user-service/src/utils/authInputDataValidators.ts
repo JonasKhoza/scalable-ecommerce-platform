@@ -47,4 +47,24 @@ const emailValidator = [
     .withMessage("Invalid email address."),
 ];
 
-export { signupValidator, emailValidator };
+const signinValidator = [
+  body("email")
+    .optional()
+    .trim()
+    .notEmpty()
+    .isEmail()
+    .withMessage("Invalid email address."),
+  body("password")
+    .trim()
+    .notEmpty()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long."),
+  body("username")
+    .optional()
+    .trim()
+    .notEmpty()
+    .isAlphanumeric()
+    .withMessage("Username must be alphanumeric."),
+];
+
+export { signupValidator, emailValidator, signinValidator };

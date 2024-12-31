@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import * as bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 import { AuthUserI, DBUser } from "../models/user.models";
 import { CustomError } from "../models/error.models";
 import responseHelper from "../utils/errorResponseHelper";
 import validateUserInputHelper from "../utils/validateUserInputHelper";
 import { ResponseStructure } from "../models/response.models";
+import errorResponseHelper from "../utils/errorResponseHelper";
+import { DBTokenI, Token, TokenI } from "../models/token.model";
 
 async function createUserHandler(req: Request, res: Response) {
   /*
@@ -60,7 +63,8 @@ async function createUserHandler(req: Request, res: Response) {
     } = req.body as AuthUserI;
 
     //Check if it's an existing user
-    const existingUser = await DBUser.findOne({ email });
+    const parameter = email || username;
+    const existingUser = await DBUser.findOne({ parameter });
 
     if (existingUser) {
       //User already exists
@@ -103,7 +107,7 @@ async function createUserHandler(req: Request, res: Response) {
 
     res
       .status(201)
-      .json(new ResponseStructure(true, "User is succesfully created."));
+      .json(new ResponseStructure(true, 201, "User is succesfully created."));
   } catch (err) {
     console.log(err);
     responseHelper(res, err);
@@ -111,24 +115,25 @@ async function createUserHandler(req: Request, res: Response) {
   }
 }
 
-function loginUserHandler(req: Request, res: Response) {
+async function loginUserHandler(req: Request, res: Response) {
   /*
     This endpoint handles user authentication and returns a JWT for authorized access.
 
     Workflow
-      1.Receive Credentials: Accept email and password.
+      1.Receive Credentials: Accept email/username and password.
       2.Validation:
-        Ensure both fields are provided.
-        User Lookup:
+        Ensure all fields are provided.
+      3. Check if a user is already logged in
+      4.User Lookup:
         Find the user by email/username in the database.
         If no user exists, return an error.
-        Password Validation:
+      5.Password Validation:
         Compare the provided password with the stored hashed password using bcrypt.
         If the password is incorrect, return an error.
-      10.JWT Creation:
-      11.Generate a JWT containing the user's ID and other claims.
-      12.Sign the JWT with a secret key.
-      13.Response: Return the JWT and any additional user info needed for the client.
+      6.JWT Creation:
+      7.Generate a JWT containing the user's ID and other claims.
+      8.Sign the JWT with a secret key.
+      9.Response: Return the JWT and any additional user info needed for the client.
 
 
       {
@@ -136,11 +141,103 @@ function loginUserHandler(req: Request, res: Response) {
         password
       }
   */
+  try {
+    //Get the input validation results from express validator middleware
+    const validationResults = validationResult(req);
+    //Get condition of results
+    const result = validateUserInputHelper(validationResults);
 
-  const { username, password } = req.body;
-  console.log(req.body);
+    //Check condition of results
+    if (!result.success) {
+      //If error, then throw the error
+      throw result;
+    }
 
-  res.status(200).json("Logged in");
+    const { username, email, password } = req.body;
+
+    //Check users existence in the database
+    const parameter = email
+      ? { email: email }
+      : username
+      ? { username: username }
+      : { email };
+
+    const existingUser = await DBUser.findOne(parameter);
+
+    if (!existingUser) {
+      //User already exists
+      throw new CustomError(false, "User does not exists!!", 404);
+    }
+
+    //Validate password
+
+    const passwordMatched = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (!passwordMatched) {
+      throw new CustomError(false, "Passwords do not match.", 400);
+    }
+
+    //Generate an access token
+    const accessToken = jwt.sign(
+      {
+        userId: existingUser._id,
+        createdAt: existingUser.createdAt,
+        updatedAt: existingUser.updatedAt,
+      },
+      String(process.env.ACCESS_TOKEN_SECRET!),
+      { algorithm: "HS256", expiresIn: "15min" }
+    );
+
+    //Generate a refresh token
+    const refreshToken = jwt.sign(
+      {
+        userId: existingUser._id,
+        createdAt: existingUser.createdAt,
+        updatedAt: existingUser.updatedAt,
+      },
+      String(process.env.REFRESH_TOKEN_SECRET!),
+      { algorithm: "HS256", expiresIn: "1d" }
+    );
+
+    //Save refresh token to the database
+    // Get client IP
+    console.log(req.socket.remoteAddress);
+
+    const clientIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    // Get User-Agent
+    const userAgent = req.headers["user-agent"];
+
+    //Generate refreshToken expiry time
+
+    const refreshTokenExpiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    const token = new Token({
+      token: String(refreshToken),
+      user: existingUser._id,
+      expiresAt: refreshTokenExpiryTime, // 1 day from now
+      deviceInfo: { clientIP: clientIP, clientUserAgent: userAgent },
+    });
+
+    await token.save();
+
+    //Set refresh token as an httpOnly and Secure cookie
+    res.cookie("refreshToken", String(refreshToken), {
+      expires: refreshTokenExpiryTime,
+      path: "/",
+      sameSite: "lax",
+      secure: false, //defines the cookie as https only
+      httpOnly: true,
+    });
+
+    //Send back access token as json
+
+    res.status(200).json(new ResponseStructure(true, 200, accessToken));
+  } catch (err) {
+    errorResponseHelper(res, err);
+  }
 }
 
 function getUserProfileHandler(req: Request, res: Response) {
@@ -183,9 +280,106 @@ function updateUserProfileHandler(req: Request, res: Response) {
   res.status(201).json("Updated profile");
 }
 
+async function refreshToken(req: Request, res: Response) {
+  try {
+    //Access refresh token the cookie
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      throw new CustomError(false, "Refresh token not provided", 401);
+    }
+
+    //Verify the refresh token's signature, expiration, and presence in the database.
+    try {
+      jwt.verify(
+        String(refreshToken),
+        String(process.env.REFRESH_TOKEN_SECRET!)
+      );
+    } catch (err: any) {
+      throw new CustomError(
+        false,
+        "Invalid or expired refresh token.",
+        403,
+        err
+      );
+    }
+
+    //Check the token against what is in the database
+    const storedToken: DBTokenI | null = await Token.findOne({
+      token: refreshToken,
+    });
+
+    if (!storedToken)
+      throw new CustomError(false, "Invalid refresh token", 403);
+
+    // GENERATE NEW ACCESS TOKENS
+    //Generate an access token
+    const newAccessToken = jwt.sign(
+      {
+        userId: storedToken.user,
+        createdAt: storedToken.createdAt,
+        updatedAt: storedToken.updatedAt,
+      },
+      process.env.ACCESS_TOKEN_SECRET!,
+      { algorithm: "HS256", expiresIn: "15min" }
+    );
+
+    //Generate a refresh token
+    const newRefreshToken = jwt.sign(
+      {
+        userId: storedToken.user,
+        createdAt: storedToken.createdAt,
+        updatedAt: storedToken.updatedAt,
+      },
+      process.env.REFRESH_TOKEN_SECRET!,
+      { algorithm: "HS256", expiresIn: "1d" }
+    );
+
+    //Save refresh token to the database
+    // Get client IP
+    const clientIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    // Get User-Agent
+    const userAgent = req.headers["user-agent"];
+
+    //Generate refreshToken expiry time
+    const refreshTokenExpiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await Token.updateMany(
+      { token: refreshToken },
+      {
+        $set: {
+          token: newRefreshToken,
+          user: storedToken.user,
+          expiresAt: refreshTokenExpiryTime, // 1 day from now
+          deviceInfo: { clientIP: clientIP, clientUserAgent: userAgent },
+        },
+      }
+    );
+
+    //Clear the existing cookie first
+    res.clearCookie("refreshCookie");
+
+    //Set refresh token as an httpOnly and Secure cookie
+    res.cookie("refreshToken", String(newRefreshToken), {
+      expires: refreshTokenExpiryTime,
+      path: "/",
+      sameSite: "lax",
+      secure: false, //defines the cookie as https only
+      httpOnly: true,
+    });
+
+    //Send back access token as json
+    res
+      .status(200)
+      .json(new ResponseStructure(true, 200, String(newAccessToken)));
+  } catch (err) {
+    errorResponseHelper(res, err);
+  }
+}
+
 export {
   createUserHandler,
   loginUserHandler,
   getUserProfileHandler,
   updateUserProfileHandler,
+  refreshToken,
 };

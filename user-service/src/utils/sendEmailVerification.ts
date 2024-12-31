@@ -51,7 +51,7 @@ export default async function sendEmailVerification(
       text: `Your OTP is: ${otp}`,
     });
 
-    return new ResponseStructure(true, "Email sent successfully");
+    return new ResponseStructure(true, 200, "Email sent successfully.");
   } catch (err: any) {
     // Customize error message and add HTTP status code
     if (err.code === "EAUTH") {

@@ -13,6 +13,7 @@ class ResponseStructure {
   public success: boolean;
   public data?: any;
   public metadata?: any;
+  public statusCode: number;
   public error?: {
     code: number;
     message: string;
@@ -20,6 +21,7 @@ class ResponseStructure {
 
   constructor(
     s: boolean,
+    c: number,
     d?: any,
     mt?: any,
     err?: {
@@ -29,6 +31,7 @@ class ResponseStructure {
     }
   ) {
     (this.success = s),
+      (this.statusCode = c),
       (this.data = d),
       (this.metadata = mt),
       (this.error = err);
