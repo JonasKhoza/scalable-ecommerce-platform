@@ -1,0 +1,8 @@
+NICE TO HAVE:
+Elasticsearch: If you want advanced search capabilities (faster product search).
+Containerization:
+
+Docker: Containerize the service for easier deployment and scaling.
+Caching:
+
+Redis: Use Redis for caching frequently accessed data (e.g., product information, categories) to improve performance.
