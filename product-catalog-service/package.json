@@ -4,7 +4,9 @@
   "description": "Manage product listings and inventory.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "nodemon src/server.ts -L"
   },
   "author": "Jonas Khoza",
   "license": "MIT",
@@ -16,6 +18,7 @@
   },
   "dependencies": {
     "@types/cookie-parser": "^1.4.8",
-    "cookie-parser": "^1.4.7"
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2"
   }
 }

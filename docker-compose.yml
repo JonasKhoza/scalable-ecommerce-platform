@@ -1,16 +1,23 @@
-version: '3.8'
+version: "3.8"
 services:
   user-service:
-    build: 
+    build:
       context: ./user-service #Build from the users service
       dockerfile: ./Dockerfile
-    volumes: 
+    volumes:
       - ./user-service:/app #Mount the user-service directory to /app in the container
       - /app/node_modules # Prevents overwriting node_modules
     ports:
       - "8000:8000"
 
-  # product-catalog-service:
+  product-catalog-service:
+    build:
+      context: ./product-catalog-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./product-catalog-service:/app #Mount the product-catalog-service directory to /app in the container
+    ports:
+      - "5000:5000"
   # shopping-cart-service:
   # order-service:
   # payment-service:
