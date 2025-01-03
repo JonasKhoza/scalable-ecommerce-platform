@@ -1,0 +1,6 @@
+RATE LIMITING USER LOGIN
+Rate Limiting: Protect the refresh endpoint with rate-limiting to prevent brute force attacks on refresh tokens.
+Token Revocation: Detect token compromise or logout event.
+                Mark the refresh token as revoked or delete it from the database.
+                Ensure the revoked token cannot be used to generate new tokens.
+

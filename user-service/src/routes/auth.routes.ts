@@ -4,9 +4,13 @@ import {
   createUserHandler,
   getUserProfileHandler,
   loginUserHandler,
+  refreshToken,
   updateUserProfileHandler,
 } from "../controllers/auth.controllers";
-import { signupValidator } from "../utils/authInputDataValidators";
+import {
+  signinValidator,
+  signupValidator,
+} from "../utils/authInputDataValidators";
 import validateContentType from "../middlewares/validateContentType";
 import { applicationjson } from "../utils/contentTypes";
 
@@ -18,12 +22,19 @@ router.post(
   signupValidator,
   createUserHandler
 );
-router.post("/login", validateContentType(applicationjson), loginUserHandler);
+router.post(
+  "/login",
+  validateContentType(applicationjson),
+  signinValidator,
+  loginUserHandler
+);
+
 router.get("/profile", getUserProfileHandler);
 router.put(
   "/profile",
   validateContentType(applicationjson),
   updateUserProfileHandler
 );
+router.post("/refresh", refreshToken);
 
 export default router;

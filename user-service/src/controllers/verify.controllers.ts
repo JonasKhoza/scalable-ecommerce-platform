@@ -103,7 +103,7 @@ async function verifyUserEmailOTPHandler(req: Request, res: Response) {
     //If no error occured
     res
       .status(200)
-      .json(new ResponseStructure(true, "Successfully verified email."));
+      .json(new ResponseStructure(true, 200, "Successfully verified email."));
   } catch (err) {
     errorResponseHelper(res, err);
     return;
