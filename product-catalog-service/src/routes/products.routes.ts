@@ -7,13 +7,18 @@ import {
   getProductHandler,
   updateProductDetails,
 } from "../controllers/products.controllers";
+import {
+  parameterValidator,
+  productInfoValidation,
+  productUpdateValidation,
+} from "../utils/validateProductInfo";
 
 const router = Router();
 
 router.get("/", getAllProductsHandler);
-router.get("/:id", getProductHandler);
-router.post("/", createNewProductHandler);
-router.put("/:id", updateProductDetails);
-router.delete(":id", deleteProductHandler);
+router.get("/:id", parameterValidator, getProductHandler);
+router.post("/", productInfoValidation, createNewProductHandler);
+router.put("/:id", productUpdateValidation, updateProductDetails);
+router.delete("/:id", parameterValidator, deleteProductHandler);
 
 export default router;

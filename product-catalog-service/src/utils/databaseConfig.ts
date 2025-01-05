@@ -17,11 +17,11 @@ pool.on("error", (err, client) => {
 });
 
 pool.on("connect", (client) => {
-  console.log("New client connected", client);
+  console.log("New client connected");
 });
 
 pool.on("acquire", (client) => {
-  console.log("Client checked out", client);
+  console.log("Client checked out");
 });
 
 const onShutDowngracefullyClosePool = () => {
