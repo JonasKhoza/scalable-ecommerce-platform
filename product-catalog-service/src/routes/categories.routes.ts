@@ -3,11 +3,11 @@ import { Router } from "express";
 import {
   createNewProductCategoryHandler,
   getProcuctsCategory,
-} from "../controllers/categories.controllers copy";
+} from "../controllers/categories.controllers";
 
 const router = Router();
 
-router.post("/", createNewProductCategoryHandler);
 router.get("/", getProcuctsCategory);
+router.post("/", createNewProductCategoryHandler);
 
 export default router;
