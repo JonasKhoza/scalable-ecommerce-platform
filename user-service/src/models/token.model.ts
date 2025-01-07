@@ -4,6 +4,7 @@ import mongoose, { Schema, Document } from "mongoose";
 interface TokenI {
   token: string;
   user: Schema.Types.ObjectId; // Reference to the User model
+
   expiresAt: Date; // Expiration date for the refresh token
   deviceInfo: {
     //Info about the device/browser

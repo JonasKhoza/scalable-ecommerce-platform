@@ -4,10 +4,11 @@ import {
   createNewProductCategoryHandler,
   getProcuctsCategory,
 } from "../controllers/categories.controllers";
+import authenticate from "../middleware/validateUserAuth";
 
 const router = Router();
 
 router.get("/", getProcuctsCategory);
-router.post("/", createNewProductCategoryHandler);
+router.post("/", authenticate, createNewProductCategoryHandler);
 
 export default router;

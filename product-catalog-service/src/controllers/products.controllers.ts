@@ -208,7 +208,7 @@ Send the created product details back.
       throw results;
     }
 
-    //// Construct the parameterized query
+    // Construct the parameterized query
     const queryText = `INSERT INTO products 
                                 (
                                     title, image, summary, old_price, price, description, color, quantity, 

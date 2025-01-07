@@ -3,13 +3,14 @@ import { validationResult } from "express-validator";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { AuthUserI, DBUser } from "../models/user.models";
+import { AuthUserI, DBUser, TokenInt } from "../models/user.models";
 import { CustomError } from "../models/error.models";
 import responseHelper from "../utils/errorResponseHelper";
 import validateUserInputHelper from "../utils/validateUserInputHelper";
 import { ResponseStructure } from "../models/response.models";
 import errorResponseHelper from "../utils/errorResponseHelper";
-import { DBTokenI, Token, TokenI } from "../models/token.model";
+import { DBTokenI, Token } from "../models/token.model";
+import getClientInfo from "../utils/getClientInfo";
 
 async function createUserHandler(req: Request, res: Response) {
   /*
@@ -184,6 +185,7 @@ async function loginUserHandler(req: Request, res: Response) {
     const accessToken = jwt.sign(
       {
         userId: existingUser._id,
+        userRole: existingUser.isAdmin,
         createdAt: existingUser.createdAt,
         updatedAt: existingUser.updatedAt,
       },
@@ -195,6 +197,7 @@ async function loginUserHandler(req: Request, res: Response) {
     const refreshToken = jwt.sign(
       {
         userId: existingUser._id,
+        userRole: existingUser.isAdmin,
         createdAt: existingUser.createdAt,
         updatedAt: existingUser.updatedAt,
       },
@@ -203,12 +206,9 @@ async function loginUserHandler(req: Request, res: Response) {
     );
 
     //Save refresh token to the database
-    // Get client IP
-    console.log(req.socket.remoteAddress);
-
-    const clientIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    // Get User-Agent
-    const userAgent = req.headers["user-agent"];
+    // Get client identifications
+    const { clientIP, userAgent } = getClientInfo(req);
+    console.log(clientIP, userAgent);
 
     //Generate refreshToken expiry time
 
@@ -285,16 +285,20 @@ async function refreshToken(req: Request, res: Response) {
     //Access refresh token the cookie
     const refreshToken = req.cookies?.refreshToken;
 
+    console.log("Hit!");
+
     if (!refreshToken) {
       throw new CustomError(false, "Refresh token not provided", 401);
     }
 
     //Verify the refresh token's signature, expiration, and presence in the database.
     try {
-      jwt.verify(
+      const user = jwt.verify(
         String(refreshToken),
         String(process.env.REFRESH_TOKEN_SECRET!)
       );
+
+      console.log(user);
     } catch (err: any) {
       throw new CustomError(
         false,
@@ -305,7 +309,7 @@ async function refreshToken(req: Request, res: Response) {
     }
 
     //Check the token against what is in the database
-    const storedToken: DBTokenI | null = await Token.findOne({
+    const storedToken: TokenInt | null = await Token.findOne({
       token: refreshToken,
     });
 
@@ -316,7 +320,8 @@ async function refreshToken(req: Request, res: Response) {
     //Generate an access token
     const newAccessToken = jwt.sign(
       {
-        userId: storedToken.user,
+        userId: storedToken.userId,
+        userRole: storedToken.userRole,
         createdAt: storedToken.createdAt,
         updatedAt: storedToken.updatedAt,
       },
@@ -327,7 +332,8 @@ async function refreshToken(req: Request, res: Response) {
     //Generate a refresh token
     const newRefreshToken = jwt.sign(
       {
-        userId: storedToken.user,
+        userId: storedToken.userId,
+        userRole: storedToken.userRole,
         createdAt: storedToken.createdAt,
         updatedAt: storedToken.updatedAt,
       },
@@ -343,12 +349,13 @@ async function refreshToken(req: Request, res: Response) {
 
     //Generate refreshToken expiry time
     const refreshTokenExpiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     await Token.updateMany(
       { token: refreshToken },
       {
         $set: {
           token: newRefreshToken,
-          user: storedToken.user,
+          user: storedToken.userId,
           expiresAt: refreshTokenExpiryTime, // 1 day from now
           deviceInfo: { clientIP: clientIP, clientUserAgent: userAgent },
         },

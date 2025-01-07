@@ -8,7 +8,7 @@ class CustomError extends Error {
     success: boolean,
     message: string,
     statusCode: number,
-    details?: string | string[] | ValidationError[]
+    details?: any
   ) {
     super(message);
     this.success = success;
