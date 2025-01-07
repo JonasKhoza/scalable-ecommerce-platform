@@ -12,13 +12,14 @@ import {
   productInfoValidation,
   productUpdateValidation,
 } from "../utils/validateProductInfo";
+import authenticate from "../middleware/validateUserAuth";
 
 const router = Router();
 
 router.get("/", getAllProductsHandler);
 router.get("/:id", parameterValidator, getProductHandler);
-router.post("/", productInfoValidation, createNewProductHandler);
-router.put("/:id", productUpdateValidation, updateProductDetails);
-router.delete("/:id", parameterValidator, deleteProductHandler);
+router.post("/", authenticate, productInfoValidation, createNewProductHandler);
+router.put("/:id", authenticate, productUpdateValidation, updateProductDetails);
+router.delete("/:id", authenticate, parameterValidator, deleteProductHandler);
 
 export default router;

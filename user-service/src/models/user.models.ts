@@ -10,6 +10,13 @@ interface AuthUserI {
   numcountrycode: string;
 }
 
+interface TokenInt {
+  userId: string;
+  userRole: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface DBUserI extends AuthUserI {
   _id: string;
   created_at: string;
@@ -36,4 +43,4 @@ const userSchema = new mongoose.Schema(
 
 const DBUser = mongoose.model("User", userSchema);
 
-export { AuthUserI, DBUserI, DBUser };
+export { AuthUserI, DBUserI, DBUser, TokenInt };

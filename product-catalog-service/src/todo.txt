@@ -1,5 +1,6 @@
 NICE TO HAVE:
-Elasticsearch: For advanced search capabilities (faster product search).
+Elasticsearch:For advanced search capabilities (faster category search).
+Containerization:
 
 Caching:
 

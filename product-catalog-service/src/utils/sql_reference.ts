@@ -27,3 +27,27 @@
 //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 //     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 // );
+
+/*
+CREATE TABLE IF NOT EXISTS categories (
+  _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- Automatically generate UUID if not provided
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  parent_id UUID REFERENCES categories(_id) ON DELETE CASCADE,  -- Self-referencing for subcategories
+  image VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  visibility BOOLEAN DEFAULT true,  -- Default to true if not specified
+  seo_metadata JSONB,
+  sort_order INT,
+  is_featured BOOLEAN DEFAULT false  -- Default to false if not specified
+);
+
+-- Create an index for faster search on the `slug`
+CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+
+--create an index on `parent_id` for if dealing with large category hierarchies
+
+CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON categories(parent_id);
+*/
