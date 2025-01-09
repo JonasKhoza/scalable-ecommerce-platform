@@ -1,0 +1,23 @@
+{
+  "name": "shopping-cart-service",
+  "version": "1.0.0",
+  "description": "Add, remove, and update cart items.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "nodemon src/server.ts -L"
+  },
+  "author": "Jonas Khoza",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
