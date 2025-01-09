@@ -9,7 +9,6 @@ services:
       - /app/node_modules # Prevents overwriting node_modules
     ports:
       - "8000:8000"
-
   product-catalog-service:
     build:
       context: ./product-catalog-service
@@ -18,7 +17,15 @@ services:
       - ./product-catalog-service:/app #Mount the product-catalog-service directory to /app in the container
     ports:
       - "5000:5000"
-  # shopping-cart-service:
+  shopping-cart-service:
+    build:
+      context: ./shopping-cart-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./shopping-cart-service:/app
+      - /app/node_modules
+    ports:
+      - "8080:8080"
   # order-service:
   # payment-service:
   # api-gateway-service:
