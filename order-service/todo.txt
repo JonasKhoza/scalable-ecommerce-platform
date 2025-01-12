@@ -1,0 +1,23 @@
+Order Service: Overview
+The Order Service will handle:
+
+1.Order Creation:
+    Extract products and quantities from the Shopping Cart.
+    Validate the cart before creating an order.
+2.Order Details:
+    Store order metadata (user ID, product details, total price, status).
+    Allow retrieval of order history for users.
+3.Order Fulfillment:
+    Change order status (e.g., "Processing," "Shipped," "Delivered").
+    Handle cancellations if applicable.
+4.Inventory Updates:
+    Deduct stock levels in the Product Catalog Service after successful order placement.
+5.(Optional) Payment Integration:
+    Communicate with a Payment Service to process payments.
+
+    API Endpoints:
+Method	Endpoint	Description
+POST	/orders	Create a new order.
+GET	/orders/:orderId	Retrieve details of a specific order.
+GET	/orders/user/:userId	Retrieve all orders for a specific user.
+PATCH	/orders/:orderId/status	Update the status of an order.

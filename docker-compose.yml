@@ -17,6 +17,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./product-catalog-service:/app #Mount the product-catalog-service directory to /app in the container
+      - /app/node_modules # Prevents overwriting node_modules
     ports:
       - "5000:5000"
   shopping-cart-service:
@@ -31,6 +32,14 @@ services:
       - /app/node_modules
     ports:
       - "8080:8080"
-  # order-service:
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./order-service:/app #Mount the product-catalog-service directory to /app in the container
+      - /app/node_modules # Prevents overwriting node_modules
+    ports:
+      - "9000:9000"
   # payment-service:
   # api-gateway-service:
