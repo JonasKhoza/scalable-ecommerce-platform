@@ -292,13 +292,14 @@ async function refreshToken(req: Request, res: Response) {
     }
 
     //Verify the refresh token's signature, expiration, and presence in the database.
+    let refreshUser: any = null;
     try {
-      const user = jwt.verify(
+      refreshUser = jwt.verify(
         String(refreshToken),
         String(process.env.REFRESH_TOKEN_SECRET!)
       );
 
-      console.log(user);
+      console.log(refreshUser);
     } catch (err: any) {
       throw new CustomError(
         false,
@@ -320,10 +321,10 @@ async function refreshToken(req: Request, res: Response) {
     //Generate an access token
     const newAccessToken = jwt.sign(
       {
-        userId: storedToken.userId,
-        userRole: storedToken.userRole,
-        createdAt: storedToken.createdAt,
-        updatedAt: storedToken.updatedAt,
+        userId: refreshUser.userId,
+        userRole: refreshUser.userRole,
+        createdAt: refreshUser.createdAt,
+        updatedAt: refreshUser.updatedAt,
       },
       process.env.ACCESS_TOKEN_SECRET!,
       { algorithm: "HS256", expiresIn: "15min" }
@@ -332,16 +333,16 @@ async function refreshToken(req: Request, res: Response) {
     //Generate a refresh token
     const newRefreshToken = jwt.sign(
       {
-        userId: storedToken.userId,
-        userRole: storedToken.userRole,
-        createdAt: storedToken.createdAt,
-        updatedAt: storedToken.updatedAt,
+        userId: refreshUser.userId,
+        userRole: refreshUser.userRole,
+        createdAt: refreshUser.createdAt,
+        updatedAt: refreshUser.updatedAt,
       },
       process.env.REFRESH_TOKEN_SECRET!,
       { algorithm: "HS256", expiresIn: "1d" }
     );
 
-    //Save refresh token to the database
+    // Save refresh token to the database
     // Get client IP
     const clientIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     // Get User-Agent

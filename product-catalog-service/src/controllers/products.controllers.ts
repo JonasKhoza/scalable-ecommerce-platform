@@ -146,7 +146,7 @@ const getProductHandler = async (req: Request, res: Response) => {
 
     const { id } = req.params;
 
-    const productQuery = "SELECT * FROM products WHERE _id = $1";
+    const productQuery = "SELECT * FROM products WHERE _id = $1 ";
 
     const productQueryResult = await connection.query(productQuery, [id]);
     const product = productQueryResult.rows;
