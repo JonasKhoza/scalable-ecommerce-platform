@@ -1,0 +1,23 @@
+/*
+CREATE TABLE carts (
+  id SERIAL PRIMARY KEY,
+  user_id VARCHAR(255) NOT NULL,
+  total_quantity INT DEFAULT 0,
+  overall_total_price DECIMAL(10, 2) DEFAULT 0.00,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE cart_items (
+  id SERIAL PRIMARY KEY,
+  cart_id INT REFERENCES carts(id) ON DELETE CASCADE,
+  product_id VARCHAR(255) NOT NULL,
+  quantity INT NOT NULL,
+  total_price DECIMAL(10, 2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+*/
