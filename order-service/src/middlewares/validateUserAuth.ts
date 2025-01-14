@@ -40,8 +40,8 @@ const authenticate = (req: Request, res: Response, next: NextFunction) => {
         );
 
       //Pass the user
-      (req as any).user = user;
-      console.log("The user:", user);
+      (req as any).userData = { user, accessToken };
+
       next();
     });
   } catch (err) {

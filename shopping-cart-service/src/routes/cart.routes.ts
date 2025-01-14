@@ -12,7 +12,7 @@ import { applicationjson } from "../utils/contentTypes";
 
 const router = Router();
 
-router.get("/", authenticate, retrieveCartHandler);
+router.get("/:cartId", authenticate, retrieveCartHandler);
 router.delete("/", authenticate, deleteCartHandler);
 router.post(
   "/add",

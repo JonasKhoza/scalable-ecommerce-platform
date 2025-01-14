@@ -21,9 +21,9 @@ services:
     ports:
       - "5000:5000"
   shopping-cart-service:
-    # depends_on:
-    #   - user-service
-    #   - product-catalog-service
+    depends_on:
+      - user-service
+      - product-catalog-service
     build:
       context: ./shopping-cart-service
       dockerfile: Dockerfile

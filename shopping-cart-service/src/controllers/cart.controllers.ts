@@ -19,11 +19,10 @@ async function addProductToCartHandler(req: Request, res: Response) {
 
     client = await pool.connect();
     //Get the product from the products service
-    const PRODUCT_SERVICE_URL =
-      process.env.PRODUCT_SERVICE_URL || "http://localhost:5000";
+    const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL;
 
     const results = await fetch(
-      `${PRODUCT_SERVICE_URL}/v1/api/products/${productId}`
+      `http://${PRODUCT_SERVICE_URL}/:5000/v1/api/products/${productId}`
     );
 
     if (!results.ok)
@@ -44,7 +43,7 @@ async function addProductToCartHandler(req: Request, res: Response) {
 
     // Check if the user has an existing cart
     const cartResult = await client.query(
-      "SELECT _id, total_quantity, overall_total_price FROM carts WHERE user_id = $1",
+      "SELECT _id, total_quantity, overall_total_price FROM carts WHERE user_id = $1 AND closed = FALSE",
       [user.userId]
     );
 
@@ -155,7 +154,7 @@ async function updateCartProductQuantHandler(req: Request, res: Response) {
 
     // Get the cart ID for the user
     const cartResult = await client.query(
-      "SELECT _id FROM carts WHERE user_id = $1",
+      "SELECT _id FROM carts WHERE user_id = $1 AND closed = FALSE",
       [userId]
     );
 
@@ -219,7 +218,7 @@ async function deleteCartProductHandler(req: Request, res: Response) {
     client = await pool.connect();
     // Get the cart ID for the user
     const cartResult = await client.query(
-      "SELECT _id FROM carts WHERE user_id = $1",
+      "SELECT _id FROM carts WHERE user_id = $1 AND closed = FALSE",
       [userId]
     );
 
@@ -267,6 +266,14 @@ async function retrieveCartHandler(req: Request, res: Response) {
   let client: PoolClient | null = null;
   try {
     const { userId }: UserI = (req as any).user;
+    const { cartId } = req.params;
+
+    if (!cartId.trim())
+      throw new CustomError(
+        false,
+        "Need to provide valid cart parameter.",
+        400
+      );
 
     client = await pool.connect();
 
@@ -274,13 +281,13 @@ async function retrieveCartHandler(req: Request, res: Response) {
     await client.query("BEGIN");
 
     const cartResults = await client.query(
-      "SELECT _id FROM carts WHERE user_id = $1 ",
-      [userId]
+      "SELECT _id FROM carts WHERE _id = $1 AND closed = FALSE",
+      [cartId]
     );
 
     //Cart availability status
     let cartMessage: string | null = null;
-    let cartId: string | null = null;
+    let userCart: string | null = null;
 
     if (cartResults.rows.length === 0) {
       // Create a new cart if none exists
@@ -288,43 +295,48 @@ async function retrieveCartHandler(req: Request, res: Response) {
         "INSERT INTO carts (user_id) VALUES ($1) RETURNING _id",
         [userId]
       );
-      cartId = createdCartResults.rows[0]._id;
+      userCart = createdCartResults.rows[0]._id;
       cartMessage = "No cart found. New empty cart created.";
     } else {
-      cartId = cartResults.rows[0]._id;
+      userCart = cartResults.rows[0]._id;
       cartMessage = "Cart successfully retrieved.";
     }
 
     //Populate the cart and send it back
+    //POPULATE THE PRODUCT
     const query = `
     WITH cart_items AS (
     SELECT
-        ci.*,
-        p.title,
-        p.price,
-        p.image
+        ci._id AS cart_items_id,ci.*,p._id AS product_id,
+        p.*
     FROM cart_items ci
     INNER JOIN products p ON ci.product_id = p._id
     WHERE ci.cart_id = $1
     )
     SELECT
     ci.*,
+    c._id AS _id,
     c.user_id,
     c.total_quantity,
-    c.overall_total_price
+    c.overall_total_price, c.closed, c.created_at, c.updated_at
     FROM cart_items ci
     INNER JOIN carts c ON ci.cart_id = c._id;
     `;
 
-    const queryResults = await client.query(query, [cartId]);
+    const queryResults = await client.query(query, [userCart]);
 
     //COMMIT THE TRANSACTION
     await client.query("COMMIT");
 
     res.status(200).json(
-      new ResponseStructure(true, 200, cartMessage, {
-        cart: queryResults.rows,
-      })
+      new ResponseStructure(
+        true,
+        200,
+        {
+          cart: queryResults.rows,
+        },
+        cartMessage
+      )
     );
   } catch (error) {
     //ROLLBACK THE TRANSACTION
@@ -347,10 +359,17 @@ async function deleteCartHandler(req: Request, res: Response) {
     // Start a transaction
     await client.query("BEGIN");
 
+    const cartResults = await client.query(
+      "SELECT _id FROM carts WHERE user_id = $1 AND closed = FALSE",
+      [userId]
+    );
+
+    const cartId = cartResults.rows[0]._id;
+
     // Check if the cart exists
     const cartResult = await client.query(
-      "SELECT _id FROM carts WHERE user_id = $1",
-      [userId]
+      "SELECT _id FROM carts WHERE cart_id = $1",
+      [cartId]
     );
 
     if (cartResult.rows.length === 0) {

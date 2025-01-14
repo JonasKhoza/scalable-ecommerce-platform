@@ -12,6 +12,6 @@ app.disable("x-powered-by");
 //Parse the incoming data as with contenty-type being json
 app.use(express.json());
 
-app.use("/v1/api/cart", cartRoutes);
+app.use("/v1/api/carts", cartRoutes);
 
 export default app;
