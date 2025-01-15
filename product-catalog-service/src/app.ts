@@ -17,7 +17,16 @@ app.use(cookieParser());
 //populate process.env with env
 
 //Routes registrations
+app.use((req, res, next) => {
+  console.log(`Request URL: ${req.originalUrl}`);
+  next();
+});
+
 app.use("/v1/api/products", productsRoutes);
 app.use("/v1/api/categories", categoriesRoutes);
+app.get("/", (req, res) => {
+  res.send("Welcome to the Product Catalog Service API");
+  console.log("Hit");
+});
 
 export default app;
