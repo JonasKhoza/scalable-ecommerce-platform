@@ -1,50 +1,81 @@
 version: "3.8"
 services:
   user-service:
+    depends_on:
+      - consul
     build:
       context: ./user-service #Build from the users service
       dockerfile: ./Dockerfile
+    hostname: user-host
+    container_name: user-service-cont
     volumes:
       - ./user-service:/app #Mount the user-service directory to /app in the container
       - /app/node_modules # Prevents overwriting node_modules
-    # ports:
-    #   - "8000:8000"
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+    ports:
+      - "8000:8000"
   product-catalog-service:
     depends_on:
       - user-service
+      - consul
     build:
       context: ./product-catalog-service
       dockerfile: Dockerfile
+    hostname: product-catalog-host
+    container_name: product-catalog-service-cont
     volumes:
       - ./product-catalog-service:/app #Mount the product-catalog-service directory to /app in the container
       - /app/node_modules # Prevents overwriting node_modules
-    # ports:
-    #   - "5000:5000"
+    ports:
+      - "5000:5000"
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
   shopping-cart-service:
     depends_on:
       - user-service
       - product-catalog-service
+      - consul
     build:
       context: ./shopping-cart-service
       dockerfile: Dockerfile
+    hostname: shopping-cart-host
+    container_name: shopping-cart-service-cont
     volumes:
       - ./shopping-cart-service:/app
       - /app/node_modules
-    # ports:
-    #   - "8080:8080"
+    ports:
+      - "8080:8080"
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
   order-service:
     build:
       context: ./order-service
       dockerfile: ./Dockerfile
+    hostname: order-host
+    container_name: order-service-cont
     volumes:
-      - ./order-service:/app #Mount the product-catalog-service directory to /app in the container
-      - /app/node_modules # Prevents overwriting node_modules
-    # ports:
-    #   - "9000:9000"
+      - ./order-service:/app
+      - /app/node_modules
+    depends_on:
+      - consul
+    ports:
+      - "9000:9000"
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
   #payment-service:
+  consul:
+    image: consul:1.15.2
+    hostname: consul-host
+    container_name: consul
+    ports:
+      - "8500:8500"
+    command: "consul agent -dev -client=0.0.0.0"
+
   api-gateway-service:
     image: nginx:1.27.3-alpine
-    container_name: api-gateway-service
+    hostname: api-gateway-host
+    container_name: api-gateway-service-cont
     ports:
       - "80:80"
     volumes:
@@ -54,3 +85,4 @@ services:
       - product-catalog-service
       - shopping-cart-service
       - order-service
+      - consul

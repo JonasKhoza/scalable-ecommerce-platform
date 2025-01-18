@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -17,16 +17,12 @@ app.use(cookieParser());
 //populate process.env with env
 
 //Routes registrations
-app.use((req, res, next) => {
-  console.log(`Request URL: ${req.originalUrl}`);
-  next();
-});
-
 app.use("/v1/api/products", productsRoutes);
 app.use("/v1/api/categories", categoriesRoutes);
-app.get("/", (req, res) => {
-  res.send("Welcome to the Product Catalog Service API");
-  console.log("Hit");
+
+//Consul health checks
+app.get("/health", async (req: Request, res: Response) => {
+  res.status(200).json({ status: "UP" }); //Consul relies on the status code, rather than the body.
 });
 
 export default app;

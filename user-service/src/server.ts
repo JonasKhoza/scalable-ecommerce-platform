@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import * as dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
@@ -26,6 +26,11 @@ app.use(cookieParser());
 
 app.use("/v1/api/users", authRouters);
 app.use("/v1/api/users/verify", verifyRoutes);
+
+//Consul health check
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({ status: "UP" });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

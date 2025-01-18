@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import * as dotenv from "dotenv";
 
 import cartRoutes from "./routes/cart.routes";
@@ -13,5 +13,10 @@ app.disable("x-powered-by");
 app.use(express.json());
 
 app.use("/v1/api/carts", cartRoutes);
+
+//Consul health checks
+app.get("/health", async (req: Request, res: Response) => {
+  res.status(200).json({ status: "UP" }); //Consul relies on the status code, rather than the body.
+});
 
 export default app;
