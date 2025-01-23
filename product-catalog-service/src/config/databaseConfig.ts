@@ -45,10 +45,10 @@ const onShutDowngracefullyClosePool = () => {
 console.log("ELK:", process.env.ELK_USERNAME, process.env.ELK_PASSWORD);
 const esClient = new Client({
   cloud: {
-    id: "My_deployment:YWYtc291dGgtMS5hd3MuZWxhc3RpYy1jbG91ZC5jb206NDQzJDE5YTRiZDEwODI1YjQ5YzBhYmQwNDg3MGNkZjI4YjQzJGZjYzI0MGQzZjNkZDQzMWVhNWE4NTBjYTg5ZmM1Y2Nj",
+    id: process.env.ELK_CLOUD_ID || "",
   },
   auth: {
-    apiKey: "NUNVWWxKUUJZdGlNZUpBQlpuU3Y6Qmg3TVRrR2dTZDZjaTFZR1htbTBKQQ==",
+    apiKey: process.env.ELK_API_KEY || "",
   },
 });
 
