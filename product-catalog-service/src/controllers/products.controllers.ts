@@ -3,7 +3,7 @@ import { validationResult } from "express-validator";
 
 import Product, { ProductInterface } from "../models/product.models";
 import validateUserInputHelper from "../utils/validateUserInputHelper";
-import { pool } from "../utils/databaseConfig";
+import { esClient, pool } from "../config/databaseConfig";
 import { PoolClient } from "pg";
 import { ResponseStructure } from "../models/response.models";
 import errorResponseHelper from "../utils/errorResponseHelper";
@@ -50,6 +50,51 @@ const getAllProductsHandler: RequestHandler = async (
     //Get a connection from the pool
     connection = await pool.connect();
 
+    // Add search condition if applicable
+    if (search) {
+      console.log("Using elasticsearch");
+      const from = (Number(currentPage) - 1) * Number(pageSize);
+
+      // Elasticsearch query
+      const esQuery = {
+        query: {
+          multi_match: {
+            query: search,
+            fields: ["title^2", "description"], // Boost relevance of the title
+          },
+        },
+      };
+
+      const body = await esClient.search({
+        index: "products",
+        from,
+        size: Number(pageSize),
+        body: esQuery,
+      });
+
+      const products = body.hits.hits.map((hit: any) => hit._source);
+      const total = (body?.hits?.total as any)?.value;
+
+      res.status(200).json(
+        new ResponseStructure(
+          true,
+          200,
+
+          {
+            total_count: total,
+            current_page: Number(currentPage),
+            page_size: pageSize,
+            total_pages: Math.ceil(total / pageSize),
+            products,
+          }
+        )
+      );
+
+      return;
+    }
+
+    //Hitting PostgreSQL in absence of a search
+    console.log("Using PostgreSQL");
     let totalCountQuery = "SELECT COUNT(*) FROM products";
     let productQuery = `
         SELECT *
@@ -58,34 +103,9 @@ const getAllProductsHandler: RequestHandler = async (
         LIMIT $1 OFFSET $2
       `;
     let queryParams: (string | number)[] = [pageSize, offset];
-    let countParams: any[] = [];
-
-    // Add search condition if applicable
-    if (search) {
-      totalCountQuery = `
-          EXPLAIN SELECT COUNT(*)
-          FROM products
-          WHERE title ILIKE '%' || $1 || '%' 
-          OR description ILIKE '%' || $1 || '%';
-
-        `;
-      productQuery = `
-          EXPLAIN SELECT *
-          FROM products
-           WHERE title ILIKE  $1 || '%' 
-          OR description ILIKE $1 || '%'
-          ORDER BY created_at DESC
-          LIMIT $2 OFFSET $3
-        `;
-      countParams = [search];
-      queryParams = [search, pageSize, offset];
-    }
 
     // Execute total count query
-    const totalCountResult = await connection.query(
-      totalCountQuery,
-      countParams
-    );
+    const totalCountResult = await connection.query(totalCountQuery);
     const totalCount = parseInt(totalCountResult.rows[0].count, 10);
 
     // Fetch products for the current page
@@ -94,17 +114,23 @@ const getAllProductsHandler: RequestHandler = async (
     const products = productsResult.rows;
 
     // Return response
-    res.status(200).json({
-      success: true,
-      data: {
-        total_count: totalCount,
-        current_page: currentPage,
-        page_size: pageSize,
-        total_pages: Math.ceil(totalCount / pageSize),
-        products,
-      },
-    });
+    res.status(200).json(
+      new ResponseStructure(
+        true,
+        200,
+
+        {
+          total_count: totalCount,
+          current_page: currentPage,
+          page_size: pageSize,
+          total_pages: Math.ceil(totalCount / pageSize),
+          products,
+        }
+      )
+    );
   } catch (err) {
+    console.error("Error fetching products from Elasticsearch:", err);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
     console.error("Error fetching products:", err);
     errorResponseHelper(res, err);
   } finally {

@@ -6,6 +6,8 @@ dotenv.config();
 import productsRoutes from "./routes/products.routes";
 import categoriesRoutes from "./routes/categories.routes";
 
+import "./utils/syncProdsToElasticS";
+
 const app = express();
 //Disable showing of the server laguage in the response headers
 app.disable("x-powered-by");

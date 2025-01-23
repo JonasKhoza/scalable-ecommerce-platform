@@ -1,5 +1,5 @@
 import app from "./app";
-import { onShutDowngracefullyClosePool } from "./utils/databaseConfig";
+import { onShutDowngracefullyClosePool } from "./config/databaseConfig";
 
 const port = process.env.PORT || 5000;
 

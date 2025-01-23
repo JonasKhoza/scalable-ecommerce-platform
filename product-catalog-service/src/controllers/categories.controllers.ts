@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { PoolClient } from "pg";
-import { pool } from "../utils/databaseConfig";
+import { pool } from "../config/databaseConfig";
 import { Category, CategoryInterface } from "../models/category.models";
 import validateUserInputHelper from "../utils/validateUserInputHelper";
 import errorResponseHelper from "../utils/errorResponseHelper";
