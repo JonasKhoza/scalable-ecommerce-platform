@@ -94,7 +94,7 @@ on:
     base:
       - main
     paths:
-      - "order-service/**" # Only trigger for PRs affecting order-service
+      - "order-service/**" #Only trigger for PRs affecting order-service
   workflow_dispatch:
 
 jobs:
