@@ -37,7 +37,7 @@ class Order {
     } catch (err) {
       return new CustomError(
         false,
-        "Failed to find orders for user.",
+        "Something wen't wrong in our serrver whilst hitting the database.",
         500,
         err
       );
@@ -58,7 +58,12 @@ class Order {
         return new CustomError(false, "Order not found.", 404);
       return rows; // Return detailed order info
     } catch (err) {
-      return new CustomError(false, "Failed to find order.", 500, err);
+      return new CustomError(
+        false,
+        "Something went wrong whilst reach the database.",
+        500,
+        err
+      );
     }
   }
 
@@ -82,7 +87,7 @@ class Order {
         await client.query(query, [this.status, this.orderId]);
 
         await client.query("COMMIT");
-        return new ResponseStructure(true, 202, "Order updated successfully.");
+        return new ResponseStructure(true, 200, "Order updated successfully.");
       } else {
         //Ensure IDEMPOTENCY by checking the existency of the cart
         const results = await client.query(
@@ -117,7 +122,7 @@ class Order {
     } catch (err) {
       await client?.query("ROLLBACK");
 
-      return new CustomError(false, "Failed to create order.", 500, err);
+      return new CustomError(false, "Database operation failed.", 500, err);
     } finally {
       client?.release();
     }

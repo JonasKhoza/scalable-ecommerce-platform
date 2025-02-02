@@ -33,7 +33,7 @@ const createUserOrderHandler = async (req: Request, res: Response) => {
 
     const cartResults = await results.json();
 
-    if (cartResults.data.length <= 0)
+    if (cartResults.data.cart.length <= 0)
       throw new CustomError(false, "Cart was not found ", 404);
 
     const { _id, user_id } = cartResults.data.cart[0];
@@ -81,6 +81,7 @@ const getUserOrderDetailsHandler = async (req: Request, res: Response) => {
     errorResponseHelper(res, err);
   }
 };
+
 const getUserOrdersHandler = async (req: Request, res: Response) => {
   try {
     //Get user data
