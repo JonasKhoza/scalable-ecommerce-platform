@@ -1,0 +1,162 @@
+# name: "Testing and Building"
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     types: [opened, closed, synchronized]
+#     branches:
+#       - main
+#   workflow_dispatch:
+
+# jobs:
+#   test:
+#     runs_on: ubuntu-latest
+#     steps:
+#       - name: Get code from our repo
+#         uses: actions/checkout@v3
+
+#       - name: Install nodejs
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 22.12.0
+
+#       - name: Cache dependencies
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.npm # where to cache
+#           key: ${{ runner.os  }}-node-${{ hashFiles("**/package-lock.json") }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Run tests
+#         run: npm test
+
+#   build:
+#     needs: test
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Get code from our repo
+#         uses: actions/checkout@v3
+
+#       - name: Install nodejs
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 22.12.0
+
+#       - name: Cache dependencies
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.npm
+#           key: ${{ runner.os  }}-node-${{ hashFiles("**/package-lock.json") }}
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Run a build
+#         run: npm run build
+
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: dist-files #name of my downloaded artifact which I can reference in subsequent jobs
+#           path: |
+#             dist
+#             register-consul.sh
+
+#   # deploy:
+#   #   needs: build
+#   #   runs-on: ubuntu-latest
+#   #   steps:
+#   #     - name: Get build artifacts
+#   #       uses: actions/download-artifact@v3
+#   #       with: #it will only have the fcontents and not the folder
+#   #         - name: dist-files # this is the key of the upload artifacts to get the it's uploads
+#   #     - name: List contents
+#   #       run: ls
+#   #     - name: Deploy
+#   #       run: echo "Deploying..."
+
+name: "Testing and Building - Order-Service"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "order-service/**" # Only trigger if files inside order-service change
+  pull_request:
+    types: [opened, closed, synchronized]
+    base:
+      - main
+    paths:
+      - "order-service/**" # Only trigger for PRs affecting order-service
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code from our repo
+        uses: actions/checkout@v3
+
+      - name: Install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.12.0
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('order-service/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: order-service # Ensure commands run inside the microservice folder
+
+      - name: Run tests
+        run: npm test
+        working-directory: order-service
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code from our repo
+        uses: actions/checkout@v3
+
+      - name: Install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.12.0
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('order-service/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: order-service
+
+      - name: Run a build
+        run: npm run build
+        working-directory: order-service
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: order-service-dist
+          path: |
+            order-service/dist
+            order-service/register-consul.sh
