@@ -208,12 +208,7 @@ jobs:
         service: [order-service]
         os: [ubuntu-latest, windows-latest]
         node: [22.12.0, 16]
-        include: 
-          - os: ubuntu-latest
-            node: 18
-        exclude:
-          - os: windows-latest
-            node: 16
+       
     steps:
       - name: Get code from our repo
         uses: actions/checkout@v3
