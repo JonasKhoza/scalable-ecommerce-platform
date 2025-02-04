@@ -125,7 +125,7 @@ jobs:
         run: |
           pwd
           ls -la
-        working-directory: ${{ matrix.service }}
+        working-directory: ./order-service
 
 
       - name: Cache dependencies
