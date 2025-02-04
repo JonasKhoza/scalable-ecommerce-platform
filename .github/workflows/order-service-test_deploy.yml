@@ -100,6 +100,17 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [order-service]
+        os: [ubuntu-latest, windows-latest]
+        node: [22.12.0, 16]
+        include: 
+          - os: ubuntu-latest
+            node: 18
+        exclude:
+          - os: windows-latest
+            node: 16
     steps:
       - name: Get code from our repo
         uses: actions/checkout@v3
@@ -107,27 +118,31 @@ jobs:
       - name: Install nodejs
         uses: actions/setup-node@v3
         with:
-          node-version: 22.12.0
+          node-version: ${{ matrix.node }}
 
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('order-service/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('${{matrix.service}}/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install dependencies
+        continue-on-error: true
         run: npm install
-        working-directory: order-service # Ensure commands run inside the microservice folder
+        working-directory: ${{ matrix.service }} # Ensure commands run inside the microservice folder
 
       - name: Run tests
         run: npm test
-        working-directory: order-service
+        working-directory: ${{ matrix.service }}
 
   build:
     needs: test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [order-service]
     steps:
       - name: Get code from our repo
         uses: actions/checkout@v3
@@ -141,22 +156,22 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('order-service/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('${{matrix.service}}/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install dependencies
         run: npm install
-        working-directory: order-service
+        working-directory: ${{matrix.service}}
 
       - name: Run a build
         run: npm run build
-        working-directory: order-service
+        working-directory: ${{matrix.service}}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: order-service-dist
           path: |
-            order-service/dist
-            order-service/register-consul.sh
+            ${{matrix.service}}/dist
+            ${{matrix.service}}/register-consul.sh
