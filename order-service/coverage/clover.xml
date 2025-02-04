@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1738500262115" clover="3.2.0">
-  <project timestamp="1738500262115" name="All files">
+<coverage generated="1738673109735" clover="3.2.0">
+  <project timestamp="1738673109735" name="All files">
     <metrics statements="138" coveredstatements="85" conditionals="17" coveredconditionals="7" methods="16" coveredmethods="7" elements="171" coveredelements="99" complexity="0" loc="138" ncloc="138" packages="3" files="6" classes="6"/>
     <package name="controllers">
       <metrics statements="60" coveredstatements="58" conditionals="9" coveredconditionals="6" methods="4" coveredmethods="4"/>
-      <file name="order.controllers.ts" path="C:\Users\jonas\Documents\Projects\scalable-ecommerce-platform\order-service\src\controllers\order.controllers.ts">
+      <file name="order.controllers.ts" path="C:\Users\User\Programming\Node projects\scalable-ecommerce-platform\order-service\src\controllers\order.controllers.ts">
         <metrics statements="60" coveredstatements="58" conditionals="9" coveredconditionals="6" methods="4" coveredmethods="4"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -70,7 +70,7 @@
     </package>
     <package name="models">
       <metrics statements="49" coveredstatements="15" conditionals="6" coveredconditionals="1" methods="6" coveredmethods="3"/>
-      <file name="error.models.ts" path="C:\Users\jonas\Documents\Projects\scalable-ecommerce-platform\order-service\src\models\error.models.ts">
+      <file name="error.models.ts" path="C:\Users\User\Programming\Node projects\scalable-ecommerce-platform\order-service\src\models\error.models.ts">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="11" count="14" type="stmt"/>
         <line num="12" count="14" type="stmt"/>
@@ -78,7 +78,7 @@
         <line num="14" count="14" type="stmt"/>
         <line num="18" count="2" type="stmt"/>
       </file>
-      <file name="order.models.ts" path="C:\Users\jonas\Documents\Projects\scalable-ecommerce-platform\order-service\src\models\order.models.ts">
+      <file name="order.models.ts" path="C:\Users\User\Programming\Node projects\scalable-ecommerce-platform\order-service\src\models\order.models.ts">
         <metrics statements="42" coveredstatements="8" conditionals="6" coveredconditionals="1" methods="4" coveredmethods="1"/>
         <line num="3" count="1" type="stmt"/>
         <line num="4" count="1" type="stmt"/>
@@ -123,7 +123,7 @@
         <line num="127" count="0" type="stmt"/>
         <line num="132" count="1" type="stmt"/>
       </file>
-      <file name="response.models.ts" path="C:\Users\jonas\Documents\Projects\scalable-ecommerce-platform\order-service\src\models\response.models.ts">
+      <file name="response.models.ts" path="C:\Users\User\Programming\Node projects\scalable-ecommerce-platform\order-service\src\models\response.models.ts">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="34" count="8" type="stmt"/>
         <line num="42" count="2" type="stmt"/>
@@ -131,7 +131,7 @@
     </package>
     <package name="utils">
       <metrics statements="29" coveredstatements="12" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="0"/>
-      <file name="databaseConfig.ts" path="C:\Users\jonas\Documents\Projects\scalable-ecommerce-platform\order-service\src\utils\databaseConfig.ts">
+      <file name="databaseConfig.ts" path="C:\Users\User\Programming\Node projects\scalable-ecommerce-platform\order-service\src\utils\databaseConfig.ts">
         <metrics statements="20" coveredstatements="9" conditionals="0" coveredconditionals="0" methods="5" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -154,7 +154,7 @@
         <line num="37" count="0" type="stmt"/>
         <line num="42" count="1" type="stmt"/>
       </file>
-      <file name="errorResponseHelper.ts" path="C:\Users\jonas\Documents\Projects\scalable-ecommerce-platform\order-service\src\utils\errorResponseHelper.ts">
+      <file name="errorResponseHelper.ts" path="C:\Users\User\Programming\Node projects\scalable-ecommerce-platform\order-service\src\utils\errorResponseHelper.ts">
         <metrics statements="9" coveredstatements="3" conditionals="2" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="3" count="1" type="stmt"/>
         <line num="4" count="1" type="stmt"/>
