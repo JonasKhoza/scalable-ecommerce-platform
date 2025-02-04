@@ -81,6 +81,109 @@
 #   #     - name: Deploy
 #   #       run: echo "Deploying..."
 
+# name: "Testing and Building - Order-Service"
+
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - "order-service/**" # Only trigger if files inside order-service change
+#   pull_request:
+#     types: [opened, closed, synchronized]
+#     base:
+#       - main
+#     paths:
+#       - "order-service/**" #Only trigger for PRs affecting order-service
+#   workflow_dispatch:
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         service: [order-service]
+#         os: [ubuntu-latest, windows-latest]
+#         node: [22.12.0, 16]
+#         include: 
+#           - os: ubuntu-latest
+#             node: 18
+#         exclude:
+#           - os: windows-latest
+#             node: 16
+#     steps:
+#       - name: Get code from our repo
+#         uses: actions/checkout@v3
+
+#       - name: Install nodejs
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: ${{ matrix.node }}
+
+#       # 
+#       - name: Check current directory and list files
+#         run: |
+#           pwd
+#           ls -la
+#         working-directory: ${{matrix.service}}
+
+
+#       - name: Cache dependencies
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.npm
+#           key: ${{ runner.os }}-node-${{ hashFiles(${{matrix.service}} + '/package-lock.json') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-
+
+#       - name: Install dependencies
+#         continue-on-error: true
+#         run: npm install
+#         working-directory: ${{ matrix.service }} # Ensure commands run inside the microservice folder
+
+#       - name: Run tests
+#         run: npm test
+#         working-directory: ${{matrix.service}}
+
+#   build:
+#     needs: test
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         service: [order-service]
+#     steps:
+#       - name: Get code from our repo
+#         uses: actions/checkout@v3
+
+#       - name: Install nodejs
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 22.12.0
+
+#       - name: Cache dependencies
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.npm
+#           key: ${{ runner.os }}-node-${{ hashFiles('${{matrix.service}}/package-lock.json') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-
+
+#       - name: Install dependencies
+#         run: npm install
+#         working-directory: ${{matrix.service}}
+
+#       - name: Run a build
+#         run: npm run build
+#         working-directory: ${{matrix.service}}
+
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: order-service-dist
+#           path: |
+#             ${{matrix.service}}/dist
+#             ${{matrix.service}}/register-consul.sh
+
 name: "Testing and Building - Order-Service"
 
 on:
@@ -94,7 +197,7 @@ on:
     base:
       - main
     paths:
-      - "order-service/**" #Only trigger for PRs affecting order-service
+      - "order-service/**" # Only trigger for PRs affecting order-service
   workflow_dispatch:
 
 jobs:
@@ -102,7 +205,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [./order-service]
+        service: [order-service]
         os: [ubuntu-latest, windows-latest]
         node: [22.12.0, 16]
         include: 
@@ -120,37 +223,35 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      # 
       - name: Check current directory and list files
         run: |
           pwd
           ls -la
-        working-directory: ${{matrix.service}}
-
+        working-directory: ${{ matrix.service }}
 
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('${{matrix.service}}/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles(matrix.service + '/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install dependencies
         continue-on-error: true
         run: npm install
-        working-directory: ${{ matrix.service }} # Ensure commands run inside the microservice folder
+        working-directory: ${{ matrix.service }}
 
       - name: Run tests
         run: npm test
-        working-directory: ${{matrix.service}}
+        working-directory: ${{ matrix.service }}
 
   build:
     needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [./order-service]
+        service: [order-service]
     steps:
       - name: Get code from our repo
         uses: actions/checkout@v3
@@ -164,22 +265,22 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('${{matrix.service}}/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles(matrix.service + '/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install dependencies
         run: npm install
-        working-directory: ${{matrix.service}}
+        working-directory: ${{ matrix.service }}
 
       - name: Run a build
         run: npm run build
-        working-directory: ${{matrix.service}}
+        working-directory: ${{ matrix.service }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: order-service-dist
           path: |
-            ${{matrix.service}}/dist
-            ${{matrix.service}}/register-consul.sh
+            ${{ matrix.service }}/dist
+            ${{ matrix.service }}/register-consul.sh
