@@ -214,10 +214,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Load and Download nodejs using a composite action
-        uses: ./github/actions/download-node
+        uses: ./.github/actions/download-node
         with:
           node-v: ${{ matrix.node }}
-        working-directory: ${{matrix.service}}
         
       - name: Check current directory and list files
         run: |
