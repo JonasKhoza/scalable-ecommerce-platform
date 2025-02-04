@@ -227,7 +227,7 @@ jobs:
         run: |
           pwd
           ls -la
-        working-directory: ${{ matrix.service }}
+        working-directory: order-service
 
       - name: Cache dependencies
         uses: actions/cache@v3
@@ -240,12 +240,11 @@ jobs:
       - name: Install dependencies
         continue-on-error: true
         run: npm install
-        working-directory: ${{ matrix.service }}
+        working-directory: order-service
 
       - name: Run tests
         run: npm test
-        working-directory: ${{ matrix.service }}
-
+        working-directory: order-service
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -271,8 +270,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ${{ matrix.service }}
-
+        working-directory: order-service
       - name: Run a build
         run: npm run build
         working-directory: ${{ matrix.service }}
