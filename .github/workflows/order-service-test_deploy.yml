@@ -213,11 +213,12 @@ jobs:
       - name: Get code from our repo
         uses: actions/checkout@v3
 
-      - name: Install nodejs
-        uses: actions/setup-node@v3
+      - name: Load and Download nodejs using a composite action
+        uses: ./github/actions/download-node
         with:
-          node-version: ${{ matrix.node }}
-
+          node-v: ${{ matrix.node }}
+        working-directory: ${{matrix.service}}
+        
       - name: Check current directory and list files
         run: |
           pwd

@@ -1,0 +1,15 @@
+name: "Install node"
+description: "Downloads nodejs for steps"
+inputs:
+  node-v:
+    description: "The node version."
+    required: true
+    default: 22.12.0
+runs:
+  using: "composite"
+  steps:
+    - name: Install nodejs
+      if: ${{ inputs.node-v }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-v }}
